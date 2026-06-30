@@ -1,7 +1,6 @@
 package com.devsuperior.aula.resources;
 
 import com.devsuperior.aula.dto.CategoryDTO;
-import com.devsuperior.aula.entities.Category;
 import com.devsuperior.aula.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
