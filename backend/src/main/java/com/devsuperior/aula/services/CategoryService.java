@@ -3,7 +3,8 @@ package com.devsuperior.aula.services;
 import com.devsuperior.aula.dto.CategoryDTO;
 import com.devsuperior.aula.entities.Category;
 import com.devsuperior.aula.repositories.CategoryRepository;
-import com.devsuperior.aula.services.exceptions.EntityNotFoundException;
+import com.devsuperior.aula.services.exceptions.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +21,7 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<CategoryDTO> findAll(){
+    public List<CategoryDTO> findAll() {
         List<Category> list = categoryRepository.findAll();
         return list.stream().map(CategoryDTO::new).toList();
     }
@@ -33,11 +34,23 @@ public class CategoryService {
     }
 
     @Transactional
-    public CategoryDTO insert(CategoryDTO categoryDTO){
+    public CategoryDTO insert(CategoryDTO categoryDTO) {
         Category entity = new Category();
         entity.setName(categoryDTO.getName());
         entity = categoryRepository.save(entity);
 
         return new CategoryDTO(entity);
+    }
+
+    @Transactional
+    public CategoryDTO update(Long id, CategoryDTO categoryDTO) {
+        try {
+            Category entity = categoryRepository.getReferenceById(id);
+            entity.setName(categoryDTO.getName());
+            entity = categoryRepository.save(entity);
+            return new CategoryDTO(entity);
+        } catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException("Id not found " + id);
+        }
     }
 }
