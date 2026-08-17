@@ -4,7 +4,6 @@ import com.devsuperior.aula.dto.CategoryDTO;
 import com.devsuperior.aula.entities.Category;
 import com.devsuperior.aula.repositories.CategoryRepository;
 import com.devsuperior.aula.services.exceptions.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,8 +12,12 @@ import java.util.Optional;
 
 @Service
 public class CategoryService {
-    @Autowired
-    private CategoryRepository categoryRepository;
+
+    private final CategoryRepository categoryRepository;
+
+    public CategoryService(CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
+    }
 
     @Transactional(readOnly = true)
     public List<CategoryDTO> findAll(){
@@ -27,5 +30,14 @@ public class CategoryService {
         Optional<Category> entity = categoryRepository.findById(id);
         Category category = entity.orElseThrow(() -> new EntityNotFoundException("Entity not found"));
         return new CategoryDTO(category);
+    }
+
+    @Transactional
+    public CategoryDTO insert(CategoryDTO categoryDTO){
+        Category entity = new Category();
+        entity.setName(categoryDTO.getName());
+        entity = categoryRepository.save(entity);
+
+        return new CategoryDTO(entity);
     }
 }
