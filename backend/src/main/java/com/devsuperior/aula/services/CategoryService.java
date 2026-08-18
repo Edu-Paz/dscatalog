@@ -3,9 +3,12 @@ package com.devsuperior.aula.services;
 import com.devsuperior.aula.dto.CategoryDTO;
 import com.devsuperior.aula.entities.Category;
 import com.devsuperior.aula.repositories.CategoryRepository;
+import com.devsuperior.aula.services.exceptions.DatabaseException;
 import com.devsuperior.aula.services.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -51,6 +54,19 @@ public class CategoryService {
             return new CategoryDTO(entity);
         } catch (EntityNotFoundException e) {
             throw new ResourceNotFoundException("Id not found " + id);
+        }
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public void delete(Long id) {
+        if (!categoryRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Resource not found" + id);
+        }
+        try {
+            categoryRepository.deleteById(id);
+        }
+        catch (DataIntegrityViolationException e) {
+            throw new DatabaseException("Referntial integrity fail");
         }
     }
 }
