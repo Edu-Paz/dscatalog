@@ -1,7 +1,10 @@
 package com.devsuperior.aula.services;
 
+import com.devsuperior.aula.dto.CategoryDTO;
 import com.devsuperior.aula.dto.ProductDTO;
+import com.devsuperior.aula.entities.Category;
 import com.devsuperior.aula.entities.Product;
+import com.devsuperior.aula.repositories.CategoryRepository;
 import com.devsuperior.aula.repositories.ProductRepository;
 import com.devsuperior.aula.services.exceptions.DatabaseException;
 import com.devsuperior.aula.services.exceptions.ResourceNotFoundException;
@@ -13,15 +16,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Transactional(readOnly = true)
@@ -32,21 +35,15 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductDTO findById(Long id) {
-        Optional<Product> entity = productRepository.findById(id);
-        Product product = entity.orElseThrow(() -> new EntityNotFoundException("Entity not found"));
+        Product product = productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Entity not found"));
         return new ProductDTO(product, product.getCategories());
     }
 
     @Transactional
     public ProductDTO insert(ProductDTO productDTO) {
         Product entity = new Product();
-        entity.setName(productDTO.getName());
-        entity.setDescription(productDTO.getDescription());
-        entity.setPrice(productDTO.getPrice());
-        entity.setImgUrl(productDTO.getImgUrl());
-        entity.setDate(productDTO.getDate());
+        copyDtoToEntity(productDTO, entity);
         entity = productRepository.save(entity);
-
         return new ProductDTO(entity);
     }
 
@@ -54,11 +51,7 @@ public class ProductService {
     public ProductDTO update(Long id, ProductDTO productDTO) {
         try {
             Product entity = productRepository.getReferenceById(id);
-            entity.setName(productDTO.getName());
-            entity.setDescription(productDTO.getDescription());
-            entity.setPrice(productDTO.getPrice());
-            entity.setImgUrl(productDTO.getImgUrl());
-            entity.setDate(productDTO.getDate());
+            copyDtoToEntity(productDTO, entity);
             entity = productRepository.save(entity);
             return new ProductDTO(entity);
         } catch (EntityNotFoundException e) {
@@ -76,6 +69,20 @@ public class ProductService {
         }
         catch (DataIntegrityViolationException e) {
             throw new DatabaseException("Referntial integrity fail");
+        }
+    }
+
+    private void copyDtoToEntity(ProductDTO productDTO, Product entity) {
+        entity.setName(productDTO.getName());
+        entity.setDescription(productDTO.getDescription());
+        entity.setPrice(productDTO.getPrice());
+        entity.setImgUrl(productDTO.getImgUrl());
+        entity.setDate(productDTO.getDate());
+
+        entity.getCategories().clear();
+        for (CategoryDTO categoryDTO : productDTO.getCategories()) {
+            Category category = categoryRepository.getReferenceById(categoryDTO.getId());
+            entity.getCategories().add(category);
         }
     }
 }
