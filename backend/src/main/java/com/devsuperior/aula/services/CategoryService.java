@@ -64,7 +64,7 @@ public class CategoryService {
             categoryRepository.deleteById(id);
         }
         catch (DataIntegrityViolationException e) {
-            throw new DatabaseException("Referntial integrity fail");
+            throw new DatabaseException("Referential integrity fail");
         }
     }
 }
