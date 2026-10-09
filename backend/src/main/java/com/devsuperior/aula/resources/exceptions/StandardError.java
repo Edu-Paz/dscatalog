@@ -1,9 +1,12 @@
 package com.devsuperior.aula.resources.exceptions;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.Instant;
 
-public class StandardError {
-
+public class StandardError implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private Instant timestamp;
     private Integer status;
     private String error;
