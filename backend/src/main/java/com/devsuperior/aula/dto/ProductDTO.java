@@ -2,6 +2,10 @@ package com.devsuperior.aula.dto;
 
 import com.devsuperior.aula.entities.Category;
 import com.devsuperior.aula.entities.Product;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -15,10 +19,18 @@ public class ProductDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long id;
+
+    @Size(min = 5, max = 60, message = "Name must have between 5 and 60 letters")
+    @NotBlank(message = "Required field")
     private String name;
+    @NotBlank(message = "Required field")
     private String description;
+
+    @Positive(message = "Price must be positive")
     private Double price;
     private String imgUrl;
+
+    @PastOrPresent(message = "Date can not be in the future")
     private Instant date;
 
     private List<CategoryDTO> categories = new ArrayList<>();
