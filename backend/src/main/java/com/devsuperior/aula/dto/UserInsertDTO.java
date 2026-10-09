@@ -1,7 +1,10 @@
 package com.devsuperior.aula.dto;
 
+import com.devsuperior.aula.services.validation.UserInsertValid;
+
 import java.io.Serial;
 
+@UserInsertValid
 public class UserInsertDTO extends UserDTO {
     @Serial
     private static final long serialVersionUID = 1L;
